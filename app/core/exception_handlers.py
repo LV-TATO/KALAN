@@ -17,5 +17,9 @@ _STATUS_MAP = {
 def register_exception_handlers(app: FastAPI) -> None:
     @app.exception_handler(AppException)
     async def hundle_app_exception(request: Request, exc: AppException):
-        status_code = _STATUS_MAP.get(type(exc), 400)
+        status_code = 400
+        for exc_type, code in _STATUS_MAP.items():
+            if isinstance(exc, exc_type):
+                status_code = code
+                break
         return JSONResponse(status_code=status_code, content={"detail": exc.detail})

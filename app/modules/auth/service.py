@@ -14,13 +14,18 @@ from app.modules.auth.session_store import (
     create_session, delete_session, extend_session, get_session, hash_token,
 )
 
+from app.modules.auth.exceptions import (
+    CredencialesInvalidasException, EmailYaRegistradoException,
+    SesionExpiradaException, SesionInvalidaException
+)
+
 class AuthService:
     def __init__(self, db: Session):
         self.repository = UsuarioRepository(db)
 
     def register(self, data: UsuarioCreate) -> TokenResponse:
         if self.repository.get_by_email(data.email):
-            raise ConflictException("El email ya esta registrado")
+            raise EmailYaRegistradoException()
 
         usuario = Usuario(
             email=data.email,
@@ -34,27 +39,26 @@ class AuthService:
     def login(self, data: LoginRequest) -> TokenResponse:
         usuario = self.repository.get_by_email(data.email)
         if not usuario or not verify_password(data.password, usuario.password_hash):
-            raise UnauthorizedException("Credenciales Invalidas")
+            raise CredencialesInvalidasException()
         return self._issue_tokens(usuario.id)
 
     def refresh(self, refresh_token: str) -> AccessTokenResponse:
         session_hash = hash_token(refresh_token)
         session = get_session(session_hash)
         if not session:
-            raise UnauthorizedException("Sesion Invalida o expirada")
+            raise SesionInvalidaException()
 
         created_at = datetime.fromisoformat(session["created_at"])
         max_age = timedelta(days=settings.session_absolute_max_days)
         if datetime.now(timezone.utc) - created_at > max_age:
             delete_session(session_hash)
-            raise UnauthorizedException("La sesion alcanzo su duracion maxima, inicia sesion de nuevo")
+            raise SesionExpiradaException()
 
         extend_session(session_hash)
         access_token = create_acces_token({"sub": session["user_id"], "sid": session_hash})
         return AccessTokenResponse(access_token=access_token)
 
-    def logout(self, refresh_token: str) -> None:
-        session_hash = hash_token(refresh_token)
+    def logout_session(self, session_hash: str) -> None:
         delete_session(session_hash)
 
     def _issue_tokens(self, user_id: int) -> TokenResponse:
