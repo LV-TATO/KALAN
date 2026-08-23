@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     database_url: str
     jwt_secret_key: str
     jwt_algorithm: str = "HS256"
-    jwt_access_token_expire_minutes: int = 1440
+    jwt_access_token_expire_minutes: int = 15
 
     redis_url: str = "redis://localhost:6379/0"
     cors_origins: str = "http://localhost:5173"

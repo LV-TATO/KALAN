@@ -1,0 +1,1 @@
+# Sin dependencias propias — usa get_current_user / get_current_user_ws de auth.
