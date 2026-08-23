@@ -10,6 +10,8 @@ from app.modules.auth.models import Usuario
 from app.modules.auth.repository import UsuarioRepository
 from app.modules.auth.session_store import extend_session
 
+from app.modules.auth.session_history_repository import SesionHistoryRepository
+
 _bearer_scheme = HTTPBearer()
 
 def _get_token_payload(credentials: HTTPAuthorizationCredentials = Depends(_bearer_scheme)) -> dict:
@@ -19,9 +21,14 @@ def _get_token_payload(credentials: HTTPAuthorizationCredentials = Depends(_bear
         raise SesionInvalidaException()
 
 
-def get_current_session_hash(payload: dict = Depends(_get_token_payload)) -> str:
+def get_current_session_hash(
+    payload: dict = Depends(_get_token_payload),
+    db: Session = Depends(get_db),
+) -> str:
     session_hash = payload.get("sid")
     if not session_hash or not extend_session(session_hash):
+        if session_hash:
+            SesionHistoryRepository(db).end(session_hash, "inactividad")
         raise SesionInvalidaException()
     return session_hash
 

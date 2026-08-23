@@ -19,9 +19,13 @@ from app.modules.auth.exceptions import (
     SesionExpiradaException, SesionInvalidaException
 )
 
+from app.modules.auth.session_history_repository import SesionHistoryRepository
+
 class AuthService:
     def __init__(self, db: Session):
+        self.db = db
         self.repository = UsuarioRepository(db)
+        self.history_repository = SesionHistoryRepository(db)
 
     def register(self, data: UsuarioCreate) -> TokenResponse:
         if self.repository.get_by_email(data.email):
@@ -46,12 +50,14 @@ class AuthService:
         session_hash = hash_token(refresh_token)
         session = get_session(session_hash)
         if not session:
+            self.history_repository.end(session_hash, "inactividad")
             raise SesionInvalidaException()
 
         created_at = datetime.fromisoformat(session["created_at"])
         max_age = timedelta(days=settings.session_absolute_max_days)
         if datetime.now(timezone.utc) - created_at > max_age:
             delete_session(session_hash)
+            self.history_repository.end(session_hash, "limite_absoluto")
             raise SesionExpiradaException()
 
         extend_session(session_hash)
@@ -60,8 +66,10 @@ class AuthService:
 
     def logout_session(self, session_hash: str) -> None:
         delete_session(session_hash)
+        self.history_repository.end(session_hash, "logout")
 
     def _issue_tokens(self, user_id: int) -> TokenResponse:
         refresh_token, session_hash = create_session(user_id)
+        self.history_repository.start(user_id, session_hash)
         access_token = create_acces_token({"sub": str(user_id), "sid": session_hash})
         return TokenResponse(access_token=access_token, refresh_token=refresh_token)
