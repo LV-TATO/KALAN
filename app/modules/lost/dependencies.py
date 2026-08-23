@@ -1,0 +1,1 @@
+# Sin dependencias propias — usa get_current_user de app.modules.auth.dependencies.
