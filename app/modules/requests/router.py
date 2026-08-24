@@ -6,12 +6,23 @@ from app.modules.auth.dependencies import get_current_user
 from app.modules.auth.models import Usuario
 from app.modules.requests.schemas import SolicitudCreate, SolicitudDecision, SolicitudOut
 from app.modules.requests.service import RequestService
+from app.modules.messages.service import MessageService
 
 router = APIRouter()
 
+from app.modules.messages.service import MessageService
+
+
 @router.post("", response_model=SolicitudOut, status_code=status.HTTP_201_CREATED)
 def create_request(data: SolicitudCreate, usuario: Usuario = Depends(get_current_user), db: Session = Depends(get_db)):
-    return RequestService(db).create_request(data, adoptante_id=usuario.id)
+    request_service = RequestService(db)
+    solicitud = request_service.create_request(data, adoptante_id=usuario.id)
+    try:
+        MessageService(db).create_solicitud_conversation(solicitud)
+    except Exception:
+        request_service.repository.delete(solicitud)
+        raise
+    return solicitud
 
 @router.get("/received", response_model=list[SolicitudOut])
 def get_received(usuario: Usuario = Depends(get_current_user), db: Session = Depends(get_db)):
