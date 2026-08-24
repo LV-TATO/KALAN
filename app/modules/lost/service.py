@@ -34,7 +34,6 @@ class LostService:
         perdida.estado = nuevo_estado
         self.db.commit()
         self.db.refresh(perdida)
-        # TODO (notifications): notificar al responsable cuando exista el módulo notifications
         return perdida
 
     def get_sightings(self, perdida_id: int) -> list[Avistamiento]:
@@ -48,5 +47,4 @@ class LostService:
 
         avistamiento = Avistamiento(perdida_id=perdida_id, usuario_id=usuario_id, **data.model_dump())
         self.sighting_repository.create(avistamiento)
-        #TODO (notifications): notificar al responsable cuando exista el módulo notifications
         return avistamiento
