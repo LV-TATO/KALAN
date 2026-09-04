@@ -21,5 +21,6 @@ api_router.include_router(messages_router, prefix="/messages", tags=["messages"]
 from app.modules.lost.router import router as lost_router
 api_router.include_router(lost_router, prefix="/lost", tags=["lost"])
 
+
 from app.modules.notifications.router import router as notifications_router
 api_router.include_router(notifications_router, prefix="/notifications", tags=["notifications"])

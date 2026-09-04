@@ -26,5 +26,5 @@ class SightingRepository(BaseRepository[Avistamiento]):
             self.db.query(Avistamiento)
             .filter(Avistamiento.perdida_id == perdida_id)
             .order_by(Avistamiento.created_at.desc())
-            .all
+            .all()
         )

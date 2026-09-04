@@ -49,7 +49,7 @@ class RequestService:
         if solicitud.estado != "pendiente":
             raise SolicitudNoPendienteException()
 
-        solicitud.estado == nuevo_estado
+        solicitud.estado = nuevo_estado
 
         if nuevo_estado == "aceptada":
             mascota = self.pet_repository.get_by_id(solicitud.mascota_id)
