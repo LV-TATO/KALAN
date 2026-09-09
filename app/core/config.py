@@ -20,6 +20,8 @@ class Settings(BaseSettings):
     session_inactivity_minutes: int = 30
     session_absolute_max_days: int = 7
 
+    session_sweep_interval_minutes: int = 5
+
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
     @property

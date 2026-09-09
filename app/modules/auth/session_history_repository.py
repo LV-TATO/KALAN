@@ -8,8 +8,12 @@ class SesionHistoryRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def start(self, usuario_id: int, session_hash:str) -> None:
-        registro = HistorialSesion(usuario_id=usuario_id, session_hash=session_hash)
+    def start(self, usuario_id: int, session_hash: str) -> None:
+        registro = HistorialSesion(
+            usuario_id=usuario_id,
+            session_hash=session_hash,
+            started_at=datetime.now(timezone.utc),
+        )
         self.db.add(registro)
         self.db.commit()
 
@@ -24,3 +28,12 @@ class SesionHistoryRepository:
             registro.ended_at = datetime.now(timezone.utc)
             registro.end_reason = reason
             self.db.commit()
+
+    def get_open_sessions(self, limit: int = 200) -> list[HistorialSesion]:
+        return (
+            self.db.query(HistorialSesion)
+            .filter(HistorialSesion.ended_at.is_(None))
+            .order_by(HistorialSesion.started_at.asc())
+            .limit(limit)
+            .all()
+        )

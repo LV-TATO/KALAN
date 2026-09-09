@@ -43,3 +43,7 @@ def get_session(session_hash: str) -> dict | None:
 
 def delete_session(session_hash:str) -> None:
     redis_client.delete(_session_key(session_hash))
+
+def session_exists(session_hash: str) -> bool:
+    """Verifica si la sesión sigue viva en Redis SIN renovar su TTL — a diferencia de extend_session."""
+    return bool(redis_client.exists(_session_key(session_hash)))
