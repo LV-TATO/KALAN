@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import String, Text, TIMESTAMP, func, ForeignKey, DateTime
+from sqlalchemy import String, Text, TIMESTAMP, func, ForeignKey, DateTime, Boolean
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
@@ -16,6 +16,11 @@ class Usuario(Base):
     foto_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     rol: Mapped[str] = mapped_column(String(20), nullable=False, server_default="user")
     created_at: Mapped[datetime] = mapped_column(TIMESTAMP, server_default=func.now())
+    bloqueado: Mapped[bool] = mapped_column(Boolean, server_default="0", nullable=False)
+    bloqueado_por_id: Mapped[int | None] = mapped_column(ForeignKey("usuarios.id"), nullable=True)
+    bloqueado_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    desbloqueado_por_id: Mapped[int | None] = mapped_column(ForeignKey("usuarios.id"), nullable=True)
+    desbloqueado_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
 class HistorialSesion(Base):
     __tablename__= "historial_sesiones"

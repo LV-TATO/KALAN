@@ -24,3 +24,6 @@ api_router.include_router(lost_router, prefix="/lost", tags=["lost"])
 
 from app.modules.notifications.router import router as notifications_router
 api_router.include_router(notifications_router, prefix="/notifications", tags=["notifications"])
+
+from app.modules.admin.router import router as admin_router
+api_router.include_router(admin_router, prefix="/admin", tags=["admin"])

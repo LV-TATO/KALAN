@@ -17,7 +17,7 @@ class PetRepository(BaseRepository[Mascota]):
         tamano: str | None = None,
         estado: str = "activa",
     ) -> list[Mascota]:
-        query = self.db.query(Mascota).filter(Mascota.estado == estado)
+        query = self.db.query(Mascota).filter(Mascota.estado == estado, Mascota.oculta == False)
 
         if zona:
             query = query.filter(Mascota.zona == zona)

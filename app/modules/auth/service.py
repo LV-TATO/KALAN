@@ -16,7 +16,8 @@ from app.modules.auth.session_store import (
 
 from app.modules.auth.exceptions import (
     CredencialesInvalidasException, EmailYaRegistradoException,
-    SesionExpiradaException, SesionInvalidaException
+    SesionExpiradaException, SesionInvalidaException,
+    UsuarioBloqueadoException
 )
 
 from app.modules.auth.session_history_repository import SesionHistoryRepository
@@ -44,6 +45,8 @@ class AuthService:
         usuario = self.repository.get_by_email(data.email)
         if not usuario or not verify_password(data.password, usuario.password_hash):
             raise CredencialesInvalidasException()
+        if usuario.bloqueado:
+            raise UsuarioBloqueadoException()
         return self._issue_tokens(usuario.id)
 
     def refresh(self, refresh_token: str) -> AccessTokenResponse:

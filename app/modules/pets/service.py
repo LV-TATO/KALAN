@@ -13,10 +13,15 @@ class PetService:
     def list_pets(self, skip, limit, zona, raza, especie, tamano) -> list[Mascota]:
         return self.repository.search(skip=skip, limit=limit, zona=zona, raza=raza, especie=especie, tamano=tamano)
 
-    def get_pet(self, mascota_id: int) -> Mascota:
+    def get_pet(self, mascota_id: int, usuario=None) -> Mascota:
         mascota = self.repository.get_by_id(mascota_id)
         if not mascota:
             raise MascotaNoEncontradaException()
+        if mascota.oculta:
+            es_dueno = usuario is not None and usuario.id == mascota.usuario_id
+            es_admin = usuario is not None and usuario.rol == "admin"
+            if not (es_dueno or es_admin):
+                raise MascotaNoEncontradaException
         return mascota
 
     def create_pet(self, data: MascotaCreate, usuario_id: int) -> Mascota:

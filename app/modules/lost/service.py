@@ -14,10 +14,15 @@ class LostService:
     def list_lost(self, skip, limit, zona, especie) -> list[Perdida]:
         return self.repository.search(skip=skip, limit=limit, zona=zona, especie=especie)
 
-    def get_lost(self, perdida_id: int) -> Perdida:
+    def get_lost(self, perdida_id: int, usuario=None) -> Perdida:
         perdida = self.repository.get_by_id(perdida_id)
         if not perdida:
             raise PerdidaNoEncontradaException()
+        if perdida.oculta:
+            es_dueno = usuario is not None and usuario.id == perdida.usuario_id
+            es_admin = usuario is not None and usuario.rol == "admin"
+            if not (es_dueno or es_admin):
+                raise PerdidaNoEncontradaException()
         return perdida
 
     def create_lost(self, data: PerdidaCreate, usuario_id: int) -> Perdida:
@@ -36,9 +41,10 @@ class LostService:
         self.db.refresh(perdida)
         return perdida
 
-    def get_sightings(self, perdida_id: int) -> list[Avistamiento]:
+    def get_sightings(self, perdida_id: int, es_admin: bool = False) -> list[Avistamiento]:
         self.get_lost(perdida_id)
-        return self.sighting_repository.get_by_perdida(perdida_id)
+        avistamientos = self.sighting_repository.get_by_perdida(perdida_id)
+        return avistamientos if es_admin else [a for a in avistamientos if not a.oculto]
 
     def create_sighting(self, perdida_id: int, data: AvistamientoCreate, usuario_id: int) -> Avistamiento:
         perdida = self.get_lost(perdida_id)

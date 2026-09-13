@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.core.cloudinary_client import generate_upload_signature
 from app.core.database import get_db
-from app.modules.auth.dependencies import get_current_user
+from app.modules.auth.dependencies import get_current_user, get_optional_user
 from app.modules.auth.models import Usuario
 from app.modules.pets.models import Mascota
 from app.modules.pets.schemas import MascotaCreate, MascotaOut, MascotaUpdate
@@ -44,8 +44,8 @@ def list_pets(
     return [_to_out(m) for m in mascotas]
 
 @router.get("/{mascota_id}", response_model=MascotaOut)
-def get_pet(mascota_id: int, db: Session = Depends(get_db)):
-    return _to_out(PetService(db).get_pet(mascota_id))
+def get_pet(mascota_id: int, usuario: Usuario | None = Depends(get_optional_user),db: Session = Depends(get_db)):
+    return _to_out(PetService(db).get_pet(mascota_id, usuario))
 
 @router.post("", response_model=MascotaOut, status_code=status.HTTP_201_CREATED)
 def create_pet(data: MascotaCreate, usuario: Usuario = Depends(get_current_user), db: Session = Depends(get_db)):

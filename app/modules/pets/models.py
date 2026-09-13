@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Boolean, ForeignKey, String, Text, TIMESTAMP, func
+from sqlalchemy import Boolean, ForeignKey, String, Text, TIMESTAMP, func, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -21,6 +21,7 @@ class Mascota(Base):
     descripcion: Mapped[str] = mapped_column(Text, nullable=False)
     foto_principal_url: Mapped[str] = mapped_column(Text, nullable=False)
     created_at: Mapped[datetime] = mapped_column(TIMESTAMP, server_default=func.now())
+    oculta: Mapped[bool] = mapped_column(Boolean, server_default="0", nullable=False)
 
     fotos: Mapped[list["FotoMascota"]] = relationship(
         back_populates="mascota", cascade="all, delete-orphan"

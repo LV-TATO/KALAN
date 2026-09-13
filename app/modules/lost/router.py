@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.core.cloudinary_client import generate_upload_signature
 from app.core.database import get_db
-from app.modules.auth.dependencies import get_current_user
+from app.modules.auth.dependencies import get_current_user, get_optional_user
 from app.modules.auth.models import Usuario
 from app.modules.lost.schemas import (
     AvistamientoCreate,
@@ -47,9 +47,10 @@ def list_lost(
 @router.get("/{perdida_id}", response_model=PerdidaOut)
 def get_lost(
     perdida_id: int,
+    usuario: Usuario | None = Depends(get_optional_user),
     db: Session = Depends(get_db),
 ):
-    return LostService(db).get_lost(perdida_id)
+    return LostService(db).get_lost(perdida_id, usuario)
 
 
 @router.post(
@@ -88,9 +89,11 @@ def update_lost(
 )
 def get_sightings(
     perdida_id: int,
+    usuario: Usuario | None = Depends(get_optional_user),
     db: Session = Depends(get_db),
 ):
-    return LostService(db).get_sightings(perdida_id)
+    es_admin = usuario is not None and usuario.rol == "admin"
+    return LostService(db).get_sightings(perdida_id, es_admin=es_admin)
 
 
 @router.post(

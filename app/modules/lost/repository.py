@@ -10,7 +10,7 @@ class LostRepository(BaseRepository[Perdida]):
     def search(self, skip=0, limit=20, zona=None, especie=None, estado_excluir="Encontrada"):
         query = self.db.query(Perdida)
         if estado_excluir:
-            query = query.filter(Perdida.estado != estado_excluir)
+            query = query.filter(Perdida.estado != estado_excluir, Perdida.oculta == False)
         if zona:
             query = query.filter(Perdida.zona == zona)
         if especie:

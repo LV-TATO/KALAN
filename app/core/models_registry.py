@@ -4,3 +4,4 @@ from app.modules.requests.models import Solicitud
 from app.modules.messages.models import Conversacion, Mensaje
 from app.modules.lost.models import Avistamiento, Perdida
 from app.modules.notifications.models import Notificacion
+from app.modules.admin.models import Reporte

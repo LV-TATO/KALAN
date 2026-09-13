@@ -18,3 +18,7 @@ class SesionInvalidaException(UnauthorizedException):
 class SesionExpiradaException(UnauthorizedException):
     def __init__(self):
         super().__init__("La sesion alcanzo su duracion maxima, inicia sesion de nuevo")
+
+class UsuarioBloqueadoException(UnauthorizedException):
+    def __init__(self):
+        super().__init__("Esta cuenta ha sido bloqueada")

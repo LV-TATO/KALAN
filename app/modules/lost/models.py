@@ -1,6 +1,6 @@
 from datetime import date, datetime
 
-from sqlalchemy import Date, ForeignKey, String, Text, TIMESTAMP, func
+from sqlalchemy import Date, ForeignKey, String, Text, TIMESTAMP, func, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -21,6 +21,7 @@ class Perdida(Base):
     fecha_perdida: Mapped[date] = mapped_column(Date, nullable=False)
     estado: Mapped[str] = mapped_column(String(20), nullable=False, server_default="Desaparecida")
     created_at: Mapped[datetime] = mapped_column(TIMESTAMP, server_default=func.now())
+    oculta: Mapped[bool] = mapped_column(Boolean, server_default="0", nullable=False)
 
     avistamientos: Mapped[list["Avistamiento"]] = relationship(
         back_populates="perdida", cascade="all, delete-orphan"
@@ -35,5 +36,6 @@ class Avistamiento(Base):
     foto_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     descripcion: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(TIMESTAMP, server_default=func.now())
+    oculto: Mapped[bool] = mapped_column(Boolean, server_default="0", nullable=False)
 
     perdida: Mapped["Perdida"] = relationship(back_populates="avistamientos")
