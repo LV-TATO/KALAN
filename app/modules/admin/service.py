@@ -51,6 +51,19 @@ class AdminService:
         if reporte.estado != "pendiente":
             raise ReporteYaResueltoException()
 
+        if data.bloquear_usuario:
+            autor_id = self._get_autor(reporte)
+            target = self.usuario_repository.get_by_id(autor_id)
+
+            if not target:
+                raise UsuarioNoEncontradoException()
+
+            if target.id == admin_id:
+                raise AccionNoPermitidaException("No puedes bloquearte a ti mismo")
+
+            if target.rol == "admin":
+                raise AccionNoPermitidaException("No puedes bloquear a otro administrador")
+
         afectado_id = None
         if data.ocultar_contenido:
             afectado_id = self._ocultar(reporte)

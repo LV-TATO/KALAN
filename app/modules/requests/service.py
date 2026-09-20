@@ -18,7 +18,7 @@ class RequestService:
 
     def create_request(self, data: SolicitudCreate, adoptante_id: int) -> Solicitud:
         mascota = self.pet_repository.get_by_id(data.mascota_id)
-        if not mascota or mascota.estado != "activa":
+        if not mascota or mascota.oculta or mascota.estado != "activa":
             raise MascotaNoDisponibleException()
 
         if mascota.usuario_id == adoptante_id:
