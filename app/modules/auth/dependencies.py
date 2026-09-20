@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 from fastapi import Depends, Query, WebSocket, WebSocketException, status as ws_status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError
@@ -26,7 +28,7 @@ def get_current_session_hash(
 ) -> str:
     session_hash = payload.get("sid")
     if not session_hash or not extend_session(session_hash):
-        if session_hash:
+        if not session_hash:
             SesionHistoryRepository(db).end(session_hash, "inactividad")
         raise SesionInvalidaException()
     return session_hash
@@ -43,7 +45,7 @@ def get_current_user(
     if not usuario:
         raise SesionInvalidaException()
     if usuario.bloqueado:
-        raise UsuarioBloqueadoException()
+        raise UsuarioBloqueadoException
     return usuario
 
 def get_optional_user(
@@ -62,20 +64,28 @@ def get_optional_user(
         return None
     return UsuarioRepository(db).get_by_id(int(user_id))
 
+@dataclass
+class WSAuthContext:
+    usuario: Usuario
+    session_hash: str
+
 async def get_current_user_ws(
     websocket: WebSocket,
     token: str = Query(...),
     db: Session = Depends(get_db),
-) -> Usuario:
+) -> WSAuthContext:
     try:
         payload = decode_access_token(token)
     except JWTError:
         raise WebSocketException(code=ws_status.WS_1008_POLICY_VIOLATION)
+
     session_hash = payload.get("sid")
     user_id = payload.get("sub")
     if not session_hash or not user_id or not extend_session(session_hash):
         raise WebSocketException(code=ws_status.WS_1008_POLICY_VIOLATION)
+
     usuario = UsuarioRepository(db).get_by_id(int(user_id))
     if not usuario or usuario.bloqueado:
         raise WebSocketException(code=ws_status.WS_1008_POLICY_VIOLATION)
-    return usuario
+
+    return WSAuthContext(usuario=usuario, session_hash=session_hash)

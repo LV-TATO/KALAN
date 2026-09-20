@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.modules.auth.dependencies import get_current_user, get_current_user_ws
+from app.modules.auth.dependencies import get_current_user, get_current_user_ws, WSAuthContext
+from app.modules.auth.session_store import extend_session
 from app.modules.auth.models import Usuario
 
 from app.core.realtime import connection_manager
@@ -174,120 +175,60 @@ async def send_avistamiento_message(
 async def _run_chat_socket(
     websocket: WebSocket,
     conversacion: Conversacion,
-    usuario: Usuario,
+    ctx: WSAuthContext,
     service: MessageService,
-    db: Session,
+    db: Session
 ):
+    usuario = ctx.usuario
     canal = f"conversacion:{conversacion.id}"
-
-    await connection_manager.connect(
-        usuario.id,
-        canal,
-        websocket,
-    )
-
+    await connection_manager.connect(usuario.id, canal, websocket)
     try:
         while True:
             data = await websocket.receive_json()
+            if not extend_session(ctx.session_hash):
+                await websocket.close(code=1008)
+                return
+
+            db.rollback()
+            db.refresh(usuario)
+            if usuario.bloqueado:
+                await websocket.close(code=1008)
+                return
 
             try:
                 mensaje = service.send_message(
-                    conversacion,
-                    MensajeCreate(
-                        contenido=data.get("contenido", "")
-                    ),
-                    emisor_id=usuario.id,
+                    conversacion, MensajeCreate(contenido=data.get("contenido", "")), emisor_id=usuario.id
                 )
-
             except Exception as e:
-                await websocket.send_json(
-                    {
-                        "error": getattr(
-                            e,
-                            "detail",
-                            "No se pudo enviar el mensaje",
-                        )
-                    }
-                )
+                await websocket.send_json({"error": getattr(e, "detail", "No se pudo enviar el mensaje")})
                 continue
 
             payload = _payload(mensaje)
-
-            await _entregar_mensaje(
-                db,
-                conversacion,
-                service.receptor_de(
-                    conversacion,
-                    usuario.id,
-                ),
-                usuario,
-                payload,
-            )
-
+            await _entregar_mensaje(db, conversacion, service.receptor_de(conversacion, usuario.id), usuario, payload)
             await websocket.send_json(payload)
-
     except WebSocketDisconnect:
         pass
-
     finally:
-        connection_manager.disconnect(
-            usuario.id,
-            canal,
-            websocket,
-        )
+        connection_manager.disconnect(usuario.id, canal, websocket)
 
 
 @router.websocket("/ws/solicitud/{solicitud_id}")
-async def solicitud_websocket(
-    websocket: WebSocket,
-    solicitud_id: int,
-    usuario: Usuario = Depends(get_current_user_ws),
-    db: Session = Depends(get_db),
-):
+async def solicitud_websocket(websocket: WebSocket, solicitud_id: int, ctx: WSAuthContext = Depends(get_current_user_ws), db: Session = Depends(get_db)):
     service = MessageService(db)
-
     try:
-        conversacion = service.get_solicitud_conversation(
-            solicitud_id,
-            usuario.id,
-        )
-
+        conversacion = service.get_solicitud_conversation(solicitud_id, ctx.usuario.id)
     except Exception:
         await websocket.close(code=1008)
         return
-
-    await _run_chat_socket(
-        websocket,
-        conversacion,
-        usuario,
-        service,
-        db,
-    )
+    await _run_chat_socket(websocket, conversacion, ctx, service, db)
 
 
 @router.websocket("/ws/avistamiento/{avistamiento_id}")
-async def avistamiento_websocket(
-    websocket: WebSocket,
-    avistamiento_id: int,
-    usuario: Usuario = Depends(get_current_user_ws),
-    db: Session = Depends(get_db),
-):
+async def avistamiento_websocket(websocket: WebSocket, avistamiento_id: int, ctx: WSAuthContext = Depends(get_current_user_ws), db: Session = Depends(get_db)):
     service = MessageService(db)
-
     try:
-        conversacion = service.get_avistamiento_conversation(
-            avistamiento_id,
-            usuario.id,
-        )
-
+        conversacion = service.get_avistamiento_conversation(avistamiento_id, ctx.usuario.id)
     except Exception:
         await websocket.close(code=1008)
         return
-
-    await _run_chat_socket(
-        websocket,
-        conversacion,
-        usuario,
-        service,
-        db,
-    )
+    await _run_chat_socket(websocket, conversacion, ctx, service, db)

@@ -16,5 +16,5 @@ class SolicitudOut(BaseModel):
     dueno_id: int
     estado: str
     created_at: datetime
-
-    model_config = {"from_attributes": True}
+    adoptante_nombre: str
+    dueno_nombre: str

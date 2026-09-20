@@ -39,10 +39,13 @@ class ReporteResolucion(BaseModel):
 class ReporteOut(BaseModel):
     id: int
     reportante_id : int
+    reportante_nombre: str
     tipo: str
     mascota_id: int | None
     perdida_id: int | None
     avistamiento_id: int | None
+    usuario_reportado_id: int
+    usuario_reportado_nombre: str
     motivo: str
     descripcion: str | None
     estado: str
@@ -51,8 +54,6 @@ class ReporteOut(BaseModel):
     usuario_bloqueado: bool
     created_at: datetime
     resolved_at: datetime | None
-
-    model_config = {"from_attributes": True}
 
 class AdoptionStatsOut(BaseModel):
     mes: str

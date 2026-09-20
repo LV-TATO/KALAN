@@ -91,6 +91,9 @@ class AdminService:
         target.desbloqueado_at = datetime.now(timezone.utc)
         self.db.commit()
 
+    def autor_de(self, reporte: Reporte) -> int:
+        return self._get_autor(reporte)
+
     # ----PRIVADOS--------
 
     def _get_objetivo(self, tipo: str, objetivo_id: int):

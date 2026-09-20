@@ -44,3 +44,4 @@ class MascotaOut(BaseModel):
     foto_principal_url: str
     fotos_secundarias: list[str]
     created_at: datetime
+    propietario_nombre: str

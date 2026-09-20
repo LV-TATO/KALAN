@@ -33,8 +33,7 @@ class PerdidaOut(BaseModel):
     fecha_perdida: date
     estado: str
     created_at: datetime
-
-    model_config = {"from_attributes": True}
+    usuario_nombre: str
 
 class AvistamientoCreate(BaseModel):
     foto_url: str | None = None
@@ -47,5 +46,4 @@ class AvistamientoOut(BaseModel):
     foto_url: str | None
     descripcion: str | None
     created_at: datetime
-
-    model_config = {"from_attributes": True}
+    usuario_nombre: str

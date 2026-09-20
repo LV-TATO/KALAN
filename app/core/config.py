@@ -22,6 +22,8 @@ class Settings(BaseSettings):
 
     session_sweep_interval_minutes: int = 5
 
+    cookie_secure: bool = False
+
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
     @property
