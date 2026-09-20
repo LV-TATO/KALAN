@@ -57,4 +57,4 @@ def delete_pet(mascota_id: int, usuario: Usuario = Depends(get_current_user), db
 
 @router.patch("/{mascota_id}/adot", response_model=MascotaOut)
 def mark_adopted(mascota_id: int, usuario: Usuario = Depends(get_current_user), db: Session = Depends(get_db)):
-    return _to_out(PetService(db).mark_adopted(mascota_id, usuario_id=usuario.id))
+    return _to_out(PetService(db).mark_adopted(mascota_id, usuario_id=usuario.id), usuario.nombre)

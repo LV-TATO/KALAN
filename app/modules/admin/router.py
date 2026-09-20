@@ -97,4 +97,10 @@ def export_stats(_: Usuario = Depends(require_admin), db: Session = Depends(get_
     for r in resultados:
         writer.writerow([r.mes, r.zona, r.especie, r.total])
     buffer.seek(0)
-    return StreamingResponse(buffer, media_type="text/csv", headers={"Content-Disposition": "attachment; filename.csv"})
+    return StreamingResponse(
+        buffer,
+        media_type="text/csv",
+        headers={
+            "Content-Disposition": "attachment; filename=adopciones.csv"
+            },
+            )

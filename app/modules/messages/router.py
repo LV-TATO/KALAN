@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.modules.auth.dependencies import get_current_user, get_current_user_ws, WSAuthContext
-from app.modules.auth.session_store import extend_session
+from app.modules.auth.session_store import extend_session, session_exists
 from app.modules.auth.models import Usuario
 
 from app.core.realtime import connection_manager
@@ -12,6 +12,8 @@ from app.modules.notifications.service import NotificationService
 from app.modules.messages.models import Conversacion
 from app.modules.messages.schemas import ConversacionOut, MensajeCreate, MensajeOut
 from app.modules.messages.service import MessageService
+
+import asyncio
 
 router = APIRouter()
 
@@ -182,15 +184,35 @@ async def _run_chat_socket(
     usuario = ctx.usuario
     canal = f"conversacion:{conversacion.id}"
     await connection_manager.connect(usuario.id, canal, websocket)
+
     try:
         while True:
-            data = await websocket.receive_json()
+            try:
+                data = await asyncio.wait_for(
+                    websocket.receive_json(),
+                    timeout=60
+                )
+            except asyncio.TimeoutError:
+                if not session_exists(ctx.session_hash):
+                    await websocket.close(code=1008)
+                    return
+
+                db.rollback()
+                db.refresh(usuario)
+
+                if usuario.bloqueado:
+                    await websocket.close(code=1008)
+                    return
+
+                continue
+
             if not extend_session(ctx.session_hash):
                 await websocket.close(code=1008)
                 return
 
             db.rollback()
             db.refresh(usuario)
+
             if usuario.bloqueado:
                 await websocket.close(code=1008)
                 return
@@ -204,6 +226,7 @@ async def _run_chat_socket(
                 continue
 
             payload = _payload(mensaje)
+            
             await _entregar_mensaje(db, conversacion, service.receptor_de(conversacion, usuario.id), usuario, payload)
             await websocket.send_json(payload)
     except WebSocketDisconnect:

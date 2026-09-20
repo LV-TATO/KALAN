@@ -28,7 +28,7 @@ def get_current_session_hash(
 ) -> str:
     session_hash = payload.get("sid")
     if not session_hash or not extend_session(session_hash):
-        if not session_hash:
+        if session_hash:
             SesionHistoryRepository(db).end(session_hash, "inactividad")
         raise SesionInvalidaException()
     return session_hash
