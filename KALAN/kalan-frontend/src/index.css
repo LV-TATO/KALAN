@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+@theme {
+  --color-kalan-primary: #0D3C38;
+  --color-kalan-secondary: #93A88E;
+  --color-kalan-accent: #8F8A80;
+  --color-kalan-cream: #F7F9F6;
+
+  --font-heading: "Cinzel", serif;
+  --font-body: system-ui, sans-serif;
+}
+
+body {
+  background-color: var(--color-kalan-cream);
+  color: var(--color-kalan-primary);
+  font-family: var(--font-body);
+}
