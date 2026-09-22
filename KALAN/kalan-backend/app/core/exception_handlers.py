@@ -22,4 +22,4 @@ def register_exception_handlers(app: FastAPI) -> None:
             if isinstance(exc, exc_type):
                 status_code = code
                 break
-        return JSONResponse(status_code=status_code, content={"detail": exc.detail})
+        return JSONResponse(status_code=status_code, content={"detail": exc.detail, "code": exc.code})

@@ -63,6 +63,12 @@ class AuthService:
             self.history_repository.end(session_hash, "limite_absoluto")
             raise SesionExpiradaException()
 
+        usuario = self.repository.get_by_id(int(session["user_id"]))
+        if not usuario:
+            raise SesionInvalidaException()
+        if usuario.bloqueado:
+            raise UsuarioBloqueadoException()
+
         extend_session(session_hash)
         access_token = create_acces_token({"sub": session["user_id"], "sid": session_hash})
         return AccessTokenResponse(access_token=access_token)

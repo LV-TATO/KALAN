@@ -8,7 +8,7 @@ export class ApiError extends Error {
             : `Error ${status}`
         )
 
-        this.name == 'ApiError'
+        this.name = 'ApiError'
         this.status = status
         this.detail = detail
     }

@@ -11,14 +11,17 @@ class CredencialesInvalidasException(UnauthorizedException):
 
 
 class SesionInvalidaException(UnauthorizedException):
+    code = "SESSION_INVALID"
     def __init__(self):
         super().__init__("Sesion invalida o expirada")
 
 
 class SesionExpiradaException(UnauthorizedException):
+    code = "SESSION_INVALID"
     def __init__(self):
         super().__init__("La sesion alcanzo su duracion maxima, inicia sesion de nuevo")
 
 class UsuarioBloqueadoException(UnauthorizedException):
+    code = "USER_BLOCKED"
     def __init__(self):
         super().__init__("Esta cuenta ha sido bloqueada")
