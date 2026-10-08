@@ -20,9 +20,9 @@ class ReporteCreate(BaseModel):
     def validar_objetivo(self):
         objetivos = {"mascota": self.mascota_id, "perdida": self.perdida_id, "avistamiento": self.avistamiento_id}
         if objetivos[self.tipo] is None:
-            raise ValueError(f"Debes inicr {self.tipo}_id para este tipo de reporte")
+            raise ValueError(f"Debes indicar el campo {self.tipo}_id para este tipo de reporte")
         if any(v is not None for k, v in objetivos.items() if k != self.tipo):
-            raise ValueError("Solo debe de venir informado el campo correspondiente al tipo de reporte")
+            raise ValueError("Indica únicamente el identificador del contenido correspondiente al tipo de reporte seleccionado")
         return self
 
 class ReporteResolucion(BaseModel):
@@ -33,7 +33,7 @@ class ReporteResolucion(BaseModel):
     @model_validator(mode="after")
     def validar_coherencia(self):
         if self.estado == "descartado" and (self.ocultar_contenido or self.bloquear_usuario):
-            raise ValueError("Un reporte descartado no puede combinarse con acciones de moderacion")
+            raise ValueError("No puedes ocultar contenido ni bloquear una cuenta al descartar un reporte")
         return self
 
 class ReporteOut(BaseModel):

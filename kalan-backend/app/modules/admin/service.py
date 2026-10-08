@@ -59,10 +59,10 @@ class AdminService:
                 raise UsuarioNoEncontradoException()
 
             if target.id == admin_id:
-                raise AccionNoPermitidaException("No puedes bloquearte a ti mismo")
+                raise AccionNoPermitidaException("No puedes bloquear tu propia cuenta")
 
             if target.rol == "admin":
-                raise AccionNoPermitidaException("No puedes bloquear a otro administrador")
+                raise AccionNoPermitidaException("No puedes bloquear una cuenta con rol de administrador")
 
         afectado_id = None
         if data.ocultar_contenido:
@@ -81,18 +81,18 @@ class AdminService:
 
         await self.notification_service.create(
             usuario_id=reporte.reportante_id, tipo="reporte_resuelto",
-            mensaje="Uno de tus contenidos fue moderado por un administrador",
+            mensaje=f"Tu reporte de moderación fue {data.estado} por un administrador",
         )
         return reporte
 
     async def block_user(self, target_id: int, admin: Usuario) -> None:
         if target_id == admin.id:
-            raise AccionNoPermitidaException("No puedes bloquearte a ti mismo")
+            raise AccionNoPermitidaException("No puedes bloquear tu propia cuenta")
         target = self.usuario_repository.get_by_id(target_id)
         if not target:
             raise UsuarioNoEncontradoException()
         if target.rol == "admin":
-            raise AccionNoPermitidaException("No puedes bloquear a otro administrador")
+            raise AccionNoPermitidaException("No puedes bloquear una cuenta con rol de administrador")
         await self._bloquear(target_id, admin.id)
 
     def unblock_user(self, target_id: int, admin_id: int) -> None:

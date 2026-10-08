@@ -18,9 +18,9 @@ class ChatNoDisponibleException(ConflictException):
 
 class AvistamientoInexistenteException(NotFoundException):
     def __init__(self):
-        super().__init__("El avistamiento no existe")
+        super().__init__("No se encontró el registro del avistamiento solicitado")
 
 
 class NoEsResponsableDelReporteException(ForbiddenException):
     def __init__(self):
-        super().__init__("Solo el responsable del reporte puede iniciar esta conversación")
+        super().__init__("Solo el usuario que publicó el reporte de pérdida puede iniciar esta conversación")

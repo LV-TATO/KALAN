@@ -39,7 +39,7 @@ async def create_request(data: SolicitudCreate, usuario: Usuario = Depends(get_c
     dueno = UsuarioRepository(db).get_by_id(solicitud.dueno_id)
     await NotificationService(db).create(
         usuario_id=solicitud.dueno_id, tipo="solicitud_recibida",
-        mensaje=f"{usuario.nombre} envio una solicitud de adopcion",
+        mensaje=f"{usuario.nombre} envió una solicitud de adopción para una mascota publicada por ti",
         solicitud_id=solicitud.id
     )
     return _to_out(solicitud, usuario.nombre, dueno.nombre if dueno else "")
@@ -60,7 +60,7 @@ async def decide_request(solicitud_id: int, data: SolicitudDecision, usuario: Us
     tipo = "solicitud_aceptada" if data.estado == "aceptada" else "solicitud_rechazada"
     await NotificationService(db).create(
         usuario_id=solicitud.adoptante_id, tipo=tipo,
-        mensaje=f"Tu solicitud fue {data.estado}",
+        mensaje=f"Tu solicitud de adopción fue {data.estado}",
         solicitud_id=solicitud.id,
     )
     adoptante = UsuarioRepository(db).get_by_id(solicitud.adoptante_id)

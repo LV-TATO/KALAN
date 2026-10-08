@@ -2,12 +2,12 @@ from app.common.exceptions import ConflictException, ForbiddenException, NotFoun
 
 class PerdidaNoEncontradaException(NotFoundException):
     def __init__(self):
-        super().__init__("Reporte de mascota perdida no encontrado")
+        super().__init__("No se encontró el reporte de pérdida solicitado")
 
 class NoEsResponsableException(ForbiddenException):
     def __init__(self):
-        super().__init__("No tienes permiso para gestionar este reporte")
+        super().__init__("No tienes permiso para cambiar el estado de este reporte de pérdida")
 
 class CasoCerradoException(ConflictException):
     def __init__(self):
-        super().__init__("Este caso ya fue marcado como encontrado")
+        super().__init__("El reporte de pérdida está cerrado porque la mascota ya fue marcada como encontrada")

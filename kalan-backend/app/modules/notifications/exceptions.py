@@ -8,4 +8,4 @@ class NotificacionNoEncontradaException(NotFoundException):
 
 class NoEsDestinatarioException(ForbiddenException):
     def __init__(self):
-        super().__init__("No tienes permiso sobre esta notificación")
+        super().__init__("No tienes permiso para marcar esta notificación como leída")
