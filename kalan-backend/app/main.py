@@ -77,7 +77,7 @@ async def errores_validacion(
             )
 
         elif tipo == "value_error" and isinstance(
-            error.get("ctx", {}).get("error", ValueError)
+            error.get("ctx", {}).get("error"), ValueError
         ):
             mensaje = str(error["ctx"]["error"])
         else:

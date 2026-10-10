@@ -23,7 +23,7 @@ export function registerSessionHandler(handler){
 }
 
 async function doFetch(path, options) {
-  const headers = { 'Content-Type': 'application/json', ...options.headerss }
+  const headers = { 'Content-Type': 'application/json', ...options.headers }
   if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`
   return fetch(`${BASE_URL}${path}`, {...options, headers, credentials: 'include'})
 }
@@ -87,7 +87,7 @@ async function request(path, options = {}, isRetry = false) {
   }
   
   const {detail, code} = await parseErrorBody(response)
-  const isExempt = AUTH_EXEMPT_PATHS.some((p) => path.startWith(p))
+  const isExempt = AUTH_EXEMPT_PATHS.some((p) => path.starstWith(p))
 
   if (response.status === 401 && !isExempt && !isRetry){
     if (code === 'USER_BLOCKED'){
