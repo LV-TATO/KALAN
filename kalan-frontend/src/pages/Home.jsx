@@ -18,8 +18,8 @@ export default function Home() {
       <h1 className="font-heading text-3xl text-kalan-primary">Kalan</h1>
       <p className="mt-4 text-kalan-accent">
         {status === 'checking' && 'Comprobando conexión con el backend…'}
-        {status === 'ok' && '✅ Backend conectado correctamente.'}
-        {status === 'error' && '⚠️ No se pudo conectar con el backend.'}
+        {status === 'ok' && 'Backend conectado correctamente.'}
+        {status === 'error' && 'No se pudo conectar con el backend.'}
       </p>
     </div>
   )

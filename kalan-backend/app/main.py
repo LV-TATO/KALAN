@@ -8,7 +8,7 @@ from app.core.config import settings
 from app.core.exception_handlers import register_exception_handlers
 from app.core.scheduler import start_scheduler, stop_scheduler
 
-from fastapi import requests
+from fastapi import Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
@@ -38,7 +38,7 @@ def health_check():
 
 @app.exception_handler(RequestValidationError)
 async def errores_validacion(
-    request: requests,
+    request: Request,
     exc: RequestValidationError
 ):
 
@@ -75,6 +75,11 @@ async def errores_validacion(
                     "Revise las comillas, comas, llaves y valores."
                 )
             )
+
+        elif tipo == "value_error" and isinstance(
+            error.get("ctx", {}).get("error", ValueError)
+        ):
+            mensaje = str(error["ctx"]["error"])
         else:
             mensaje = mensajes.get(
                 tipo,
